@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../../store/slice";
 import { mockStore, setCurrentUserId } from "../../../mocks/store";
+import { useTheme } from "../../../hooks/useTheme";
 
 const WORKERS = mockStore.workers.map((w) => ({
   id: w.id,
@@ -13,6 +14,7 @@ const LANGUAGES = ["uk", "de", "en", "ru"] as const;
 
 const MockModeSwitcher = () => {
   const dispatch = useDispatch();
+  const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [currentId, setCurrentId] = useState(mockStore.currentUserId);
 
@@ -86,6 +88,20 @@ const MockModeSwitcher = () => {
               {w.label} <span style={{ opacity: 0.7 }}>({w.type})</span>
             </button>
           ))}
+
+          <div style={{ marginTop: "8px", marginBottom: "4px", color: "#aaa", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span>Тема:</span>
+            <button
+              onClick={toggleTheme}
+              style={{
+                padding: "2px 10px", borderRadius: "4px", border: "1px solid #444",
+                cursor: "pointer", background: theme === "light" ? "#F97316" : "transparent",
+                color: "#eee", fontSize: "11px",
+              }}
+            >
+              {theme === "dark" ? "🌙 темна" : "☀️ світла"}
+            </button>
+          </div>
 
           <div style={{ marginTop: "8px", marginBottom: "6px", color: "#aaa" }}>Мова:</div>
           <div style={{ display: "flex", gap: "4px" }}>

@@ -11,6 +11,11 @@ import store from "./store/config.ts";
 import {ToastContainer} from 'react-toastify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+// Встановити тему одразу при завантаженні, щоб уникнути flash
+const savedTheme = localStorage.getItem("skybud_theme");
+const systemDark = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+document.documentElement.setAttribute("data-theme", savedTheme === "light" || savedTheme === "dark" ? savedTheme : systemDark);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
