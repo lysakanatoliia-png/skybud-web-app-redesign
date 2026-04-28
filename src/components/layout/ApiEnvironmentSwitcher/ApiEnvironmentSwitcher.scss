@@ -1,0 +1,59 @@
+.api-environment-switcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+
+  .env-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.8);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.05);
+    }
+
+    .env-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transition: background-color 0.3s ease;
+    }
+
+    &.local {
+      border-color: #4a9eff;
+      
+      .env-indicator {
+        background: #4a9eff;
+        box-shadow: 0 0 8px rgba(74, 158, 255, 0.6);
+      }
+    }
+
+    &.production {
+      border-color: #59d98b;
+      
+      .env-indicator {
+        background: #59d98b;
+        box-shadow: 0 0 8px rgba(89, 217, 139, 0.6);
+      }
+    }
+
+    .env-label {
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+

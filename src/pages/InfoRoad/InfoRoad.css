@@ -1,0 +1,162 @@
+.info-road-page {
+  min-height: 100vh;
+  background: var(--theme-bg-primary, #0a0a0a);
+  padding: 20px 16px;
+}
+
+.info-road-container {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.info-road-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--theme-text-primary, #ffffff);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.info-road-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--theme-text-primary, #ffffff);
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--theme-border, #333);
+  border-radius: 8px;
+  background: var(--theme-bg-secondary, #1a1a1a);
+  color: var(--theme-text-primary, #ffffff);
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--theme-accent, #4a9eff);
+}
+
+.form-readonly {
+  padding: 12px;
+  border: 1px solid var(--theme-border, #333);
+  border-radius: 8px;
+  background: var(--theme-bg-tertiary, #252525);
+  color: var(--theme-text-secondary, #999);
+  font-size: 14px;
+}
+
+.map-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.btn-current-location {
+  padding: 10px 16px;
+  background: var(--theme-accent, #4a9eff);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-start;
+}
+
+.btn-current-location:hover:not(:disabled) {
+  background: var(--theme-accent-hover, #3a8eef);
+}
+
+.btn-current-location:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.coordinates-display {
+  font-size: 12px;
+  color: var(--theme-text-secondary, #999);
+  padding: 8px;
+  background: var(--theme-bg-tertiary, #252525);
+  border-radius: 6px;
+  font-family: monospace;
+}
+
+.map-wrapper {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--theme-border, #333);
+}
+
+.map-hint {
+  font-size: 12px;
+  color: var(--theme-text-secondary, #999);
+  margin-top: 4px;
+}
+
+.btn-submit {
+  padding: 14px 24px;
+  background: var(--theme-accent, #4a9eff);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 8px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: var(--theme-accent-hover, #3a8eef);
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Стили для Leaflet карты */
+.leaflet-container {
+  background: var(--theme-bg-secondary, #1a1a1a);
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--theme-bg-secondary, #1a1a1a);
+  color: var(--theme-text-primary, #ffffff);
+}
+
+.leaflet-popup-tip {
+  background: var(--theme-bg-secondary, #1a1a1a);
+}
+
+@media (max-width: 640px) {
+  .info-road-title {
+    font-size: 20px;
+  }
+
+  .map-wrapper {
+    height: 300px !important;
+  }
+}
+

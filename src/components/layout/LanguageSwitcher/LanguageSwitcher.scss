@@ -1,0 +1,51 @@
+.language-switcher {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--color-primary);
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  min-width: 60px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &:focus {
+    border-color: var(--orange-primary);
+    box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+  }
+
+  option {
+    background: var(--color-element);
+    color: var(--color-primary);
+    padding: 8px;
+  }
+}
+
+// Compact version for footer
+.language-switcher--compact {
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 50px;
+}
+
+// Auth page version
+.language-switcher--auth {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
+}
