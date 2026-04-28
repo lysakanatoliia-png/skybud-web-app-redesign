@@ -2,7 +2,7 @@ import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import i18n from '@/i18n/config';
-import { Play, Square, MapPin, Calendar, MessageCircle, ListChecks, Car, Unlock, Loader2, Clock, X, AlertCircle, UserPlus, User } from 'lucide-react';
+import { Play, Square, MapPin, MessageCircle, ListChecks, Car, Unlock, Loader2, Clock, X, UserPlus } from 'lucide-react';
 import { getFacilities } from '../../../requests/facility';
 import { FacilityOut } from '../../../requests/facility/types';
 import { startWork, startWorkOffice, getActiveWorkProcess } from '../../../requests/work';
@@ -14,8 +14,6 @@ import { toastError, toastSuccess } from '../../../lib/toasts';
 import { logger } from '../../../lib/logger';
 import { ErrorDetails } from '@/components/ui/ErrorDetails';
 import TodoList from './TodoList';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { getVehicles, unassignVehicle, createVehicleReservationRequest, getWorkerReservedVehicle, getVehicleReservationRequests, cancelVehicleReservationRequest } from '../../../requests/vehicle';
 import { Vehicle, VehicleReservationRequestOut } from '../../../requests/vehicle/types';
 import type { RootState } from '@/store/config';
@@ -919,639 +917,500 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
   };
 
 
+  // ─── helpers ────────────────────────────────────────────────────────────────
+  const startBtnEnabled =
+    !isStartingWork &&
+    !isRestricted &&
+    ((canChooseWorkType && workType === 'office') ||
+      (canChooseWorkType && workType === 'facility' && !!selectedObject && !!activeWorkShift) ||
+      (!canChooseWorkType && canSelectObjectsAndVehicles && !!selectedObject && !!activeWorkShift) ||
+      (!canSelectObjectsAndVehicles));
+
+  const selectedFacility = facilities.find(f => f.id.toString() === selectedObject);
+
   return (
-    <div className="min-h-screen page bg-theme-bg-primary p-6">
-      <div className="max-w-4xl mx-auto w-full">
-        {/* Error Details */}
-        {errorDetails && (
-          <ErrorDetails
-            title={errorDetails.title}
-            message={errorDetails.message}
-            details={errorDetails.details}
-            onClose={() => setErrorDetails(null)}
-          />
-        )}
+    <div className="page" style={{ background: "var(--color-bg)" }}>
+
+      {/* ── Error details ── */}
+      {errorDetails && (
+        <ErrorDetails
+          title={errorDetails.title}
+          message={errorDetails.message}
+          details={errorDetails.details}
+          onClose={() => setErrorDetails(null)}
+        />
+      )}
         
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-theme-text-primary">{t('work.title')}</h1>
-            <div className="flex flex-wrap items-center gap-3 text-theme-text-secondary text-lg">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                <span>{t('work.today')}: {formatToday()}</span>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 4 }}>
+        <div>
+          <p style={{ fontSize: 13, color: "var(--color-text-muted)", marginBottom: 2 }}>
+            {formatToday()}
+          </p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--color-text-strong)", lineHeight: 1.2, margin: 0 }}>
+            {isWorking ? t('work.working', 'Working') : t('work.title', 'Work')}
+          </h1>
+          {user?.worker_type && (
+            <span style={{
+              display: "inline-block", marginTop: 6,
+              fontSize: 11, fontWeight: 600, letterSpacing: "0.04em",
+              padding: "2px 8px", borderRadius: 99,
+              background: "var(--color-orange-bg)",
+              color: "var(--color-orange)",
+              textTransform: "uppercase",
+            }}>
+              {t(`admin.workers.types.${user.worker_type}`, user.worker_type)}
+            </span>
+          )}
+        </div>
+
+        {/* Quick action buttons */}
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          <button onClick={() => setIsDelegateTaskDialogOpen(true)}
+            style={{
+              width: 40, height: 40, borderRadius: 12,
+              border: "1px solid var(--color-border)",
+              background: "var(--color-surface)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: "var(--color-text-muted)",
+            }}
+            title={t('work.delegateTask.button', 'Delegate task')}
+          >
+            <UserPlus size={18} />
+          </button>
+          <button onClick={onShowHistory}
+            style={{
+              width: 40, height: 40, borderRadius: 12,
+              border: "1px solid var(--color-border)",
+              background: "var(--color-surface)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: "var(--color-text-muted)",
+            }}
+            title={t('work.history.viewButton', 'History')}
+          >
+            <ListChecks size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* ── WORKING STATE ── */}
+      {isWorking ? (
+        <>
+          {/* Active work card */}
+          <div style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius)",
+            padding: "16px",
+            boxShadow: "var(--shadow-sm)",
+          }}>
+            {/* Pulsing status dot */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: "50%",
+                background: "var(--color-success)",
+                boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
+                animation: "pulse 2s infinite",
+              }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-success)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                {t('work.working', 'Working')}
+              </span>
+            </div>
+
+            {/* Current object */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "12px 14px",
+              background: "var(--color-orange-bg)",
+              border: "1px solid rgba(249,115,22,0.2)",
+              borderRadius: "var(--radius-sm)",
+              marginBottom: 14,
+            }}>
+              <MapPin size={18} color="var(--color-orange)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 15, fontWeight: 600, color: "var(--color-text-strong)" }}>
+                {canSelectObjectsAndVehicles
+                  ? (selectedFacility?.name || t('work.unnamedObject'))
+                  : t('work.office', 'Office')}
+              </span>
+            </div>
+
+            {/* Stop + Telegram buttons */}
+            <button onClick={handleStopWork} style={{
+              width: "100%", height: 52, borderRadius: "var(--radius-sm)",
+              background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)",
+              color: "#EF4444", fontSize: 15, fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              cursor: "pointer",
+            }}>
+              <Square size={18} />
+              {t('work.stopWork', 'Stop work')}
+            </button>
+
+            {canSelectObjectsAndVehicles && (
+              <button onClick={handleTelegramGroup} style={{
+                width: "100%", height: 44, borderRadius: "var(--radius-sm)",
+                background: "transparent", border: "1px solid var(--color-border)",
+                color: "var(--color-text-secondary)", fontSize: 14, fontWeight: 500,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                cursor: "pointer", marginTop: 10,
+              }}>
+                <MessageCircle size={16} />
+                {t('work.joinTelegramGroup', 'Telegram group')}
+              </button>
+            )}
+          </div>
+
+          {/* Embedded TodoList */}
+          <div style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius)",
+            padding: "16px",
+            boxShadow: "var(--shadow-sm)",
+          }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>
+              {t('work.todoList', 'Tasks')}
+            </p>
+            <TodoList
+              embedded
+              facilityId={selectedObject ? Number(selectedObject) : null}
+              facilityTypeId={facilities.find(f => f.id.toString() === selectedObject)?.facility_type_id ?? null}
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          {/* ── Work type toggle (foreman/engineer/assistant) ── */}
+          {canChooseWorkType && (
+            <div style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius)",
+              padding: "14px 16px",
+              boxShadow: "var(--shadow-sm)",
+            }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                {t('work.selectWorkType', 'Work type')}
+              </p>
+              <div style={{ display: "flex", gap: 8 }}>
+                {([['facility', MapPin, t('work.workTypeFacility', 'On-site')] , ['office', MessageCircle, t('work.workTypeOffice', 'Office')]] as const).map(([type, Icon, label]) => (
+                  <button key={type} onClick={() => setWorkType(type as 'facility' | 'office')} style={{
+                    flex: 1, height: 52, borderRadius: "var(--radius-sm)",
+                    border: `2px solid ${workType === type ? "var(--color-orange)" : "var(--color-border)"}`,
+                    background: workType === type ? "var(--color-orange-bg)" : "transparent",
+                    color: workType === type ? "var(--color-orange)" : "var(--color-text-muted)",
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
+                    cursor: "pointer", transition: "all var(--transition-fast)",
+                  }}>
+                    <Icon size={18} />
+                    <span style={{ fontSize: 11, fontWeight: 600 }}>{label}</span>
+                  </button>
+                ))}
               </div>
-              {user?.worker_type && (
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  <span>{t('work.role', 'Роль')}:</span>
-                  <Badge className="bg-theme-accent text-white">
-                    {t(`admin.workers.types.${user.worker_type}`, user.worker_type)}
-                  </Badge>
+            </div>
+          )}
+
+          {/* ── Object selector ── */}
+          {canSelectObjectsAndVehicles && workType !== 'office' && (
+            <div style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius)",
+              padding: "14px 16px",
+              boxShadow: "var(--shadow-sm)",
+            }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                {t('work.selectObject', 'Select object')}
+              </p>
+              {isLoading ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 64 }}>
+                  <Loader2 size={20} className="animate-spin" color="var(--color-text-muted)" />
+                </div>
+              ) : facilities.length === 0 ? (
+                <p style={{ fontSize: 14, color: "var(--color-text-muted)", textAlign: "center", padding: "16px 0" }}>
+                  {t('work.noObjects', 'No objects')}
+                </p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 260, overflowY: "auto" }} className="custom-scrollbar">
+                  {facilities.map((facility) => {
+                    const selected = selectedObject === facility.id.toString();
+                    return (
+                      <button key={facility.id} onClick={() => onObjectSelect(facility.id.toString())} style={{
+                        display: "flex", alignItems: "center", gap: 12,
+                        padding: "12px 14px",
+                        borderRadius: "var(--radius-sm)",
+                        border: `1px solid ${selected ? "var(--color-orange)" : "var(--color-border)"}`,
+                        background: selected ? "var(--color-orange-bg)" : "transparent",
+                        cursor: "pointer", textAlign: "left",
+                        transition: "all var(--transition-fast)",
+                      }}>
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                          background: selected ? "var(--color-orange)" : "var(--color-asphalt)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          <MapPin size={14} color={selected ? "#fff" : "var(--color-text-muted)"} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text-strong)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {facility.name || t('work.unnamedObject')}
+                          </div>
+                          {facility.status_active === false && (
+                            <div style={{ fontSize: 11, color: "var(--color-text-muted)" }}>inactive</div>
+                          )}
+                        </div>
+                        {selected && (
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--color-orange)", flexShrink: 0 }} />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full md:w-auto text-lg font-semibold gap-3 px-6 py-4"
-              onClick={() => setIsDelegateTaskDialogOpen(true)}
-            >
-              <UserPlus className="h-6 w-6" />
-              {t('work.delegateTask.button', 'Делегировать задачу')}
-            </Button>
-            <Button
-              variant="default"
-              size="lg"
-              className="w-full md:w-auto text-lg font-semibold gap-3 px-6 py-4"
-              onClick={onShowHistory}
-            >
-              <ListChecks className="h-6 w-6" />
-              {t('work.history.viewButton')}
-            </Button>
-          </div>
-        </div>
+          )}
 
-        {/* Выбор типа работы для foreman, engineer, assistant */}
-        {!isWorking && canChooseWorkType && (
-          <div className="bg-theme-bg-card border border-theme-border rounded-xl p-6 mb-6">
-            <h2 className="text-2xl font-bold text-theme-text-primary mb-4">
-              {t('work.selectWorkType', 'Выберите тип работы')}
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setWorkType('facility')}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  workType === 'facility'
-                    ? 'border-theme-accent bg-theme-accent/10'
-                    : 'border-theme-border hover:border-theme-accent/50'
-                }`}
-              >
-                <MapPin className="h-6 w-6 text-theme-accent mb-2 mx-auto" />
-                <div className="font-semibold text-theme-text-primary">
-                  {t('work.workTypeFacility', 'На объекте')}
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setWorkType('office')}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  workType === 'office'
-                    ? 'border-theme-accent bg-theme-accent/10'
-                    : 'border-theme-border hover:border-theme-accent/50'
-                }`}
-              >
-                <MessageCircle className="h-6 w-6 text-theme-accent mb-2 mx-auto" />
-                <div className="font-semibold text-theme-text-primary">
-                  {t('work.workTypeOffice', 'В офисе')}
-                </div>
-              </button>
+          {/* ── Shift card ── */}
+          {canSelectObjectsAndVehicles && (
+            <div style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius)",
+              padding: "14px 16px",
+              boxShadow: "var(--shadow-sm)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: activeWorkShift ? 10 : 0 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  {t('work.shift.title', 'Shift')}
+                </p>
+                {activeWorkShift && (
+                  <span style={{
+                    fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99,
+                    background: "rgba(34,197,94,0.12)", color: "var(--color-success)",
+                  }}>
+                    {t('work.shift.activeBadge', 'Active')}
+                  </span>
+                )}
+              </div>
+
+              {activeWorkShift ? (
+                <>
+                  <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginBottom: 10 }}>
+                    {t('work.shift.startTime', 'Started')}: {new Date(activeWorkShift.start_time).toLocaleTimeString()}
+                  </p>
+                  <button onClick={handleEndShift} disabled={isShiftActionLoading || isWorking} style={{
+                    width: "100%", height: 48, borderRadius: "var(--radius-sm)",
+                    background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
+                    color: "#EF4444", fontSize: 14, fontWeight: 600,
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    cursor: isShiftActionLoading || isWorking ? "not-allowed" : "pointer",
+                    opacity: isShiftActionLoading || isWorking ? 0.5 : 1,
+                  }}>
+                    {isShiftActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Square size={16} />}
+                    {t('work.shift.end', 'End shift')}
+                  </button>
+                  {isWorking && (
+                    <p style={{ fontSize: 11, color: "#EAB308", textAlign: "center", marginTop: 6 }}>
+                      {t('work.shift.cannotEndWhileWorking')}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <button onClick={handleStartShift} disabled={isShiftActionLoading} style={{
+                  width: "100%", height: 48, borderRadius: "var(--radius-sm)",
+                  background: "var(--color-asphalt)", border: "1px solid var(--color-border)",
+                  color: "var(--color-text-strong)", fontSize: 14, fontWeight: 600,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  cursor: isShiftActionLoading ? "not-allowed" : "pointer",
+                  marginTop: 10,
+                }}>
+                  {isShiftActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
+                  {t('work.shift.start', 'Start shift')}
+                </button>
+              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {!isWorking && canSelectObjectsAndVehicles && workType !== 'office' && (
-          <div className="bg-theme-bg-card border border-theme-border rounded-xl p-6 mb-6">
-            <h2 className="text-2xl font-bold text-theme-text-primary mb-4">{t('work.selectObject')}</h2>
-            {isLoading ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="text-theme-text-secondary text-lg">{t('common.loading')}</div>
-              </div>
-            ) : facilities.length === 0 ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="text-theme-text-secondary text-lg">{t('work.noObjects')}</div>
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar">
-                {facilities.map((facility) => (
-                  <div
-                    key={facility.id}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedObject === facility.id.toString()
-                      ? 'border-theme-accent bg-theme-accent/10'
-                      : 'border-theme-border hover:border-theme-accent/50'
-                      }`}
-                    onClick={() => onObjectSelect(facility.id.toString())}
-                  >
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-theme-accent mt-1 flex-shrink-0" />
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-theme-text-primary mb-1">
-                          {facility.name || t('work.unnamedObject')}
-                        </h3>
-                        {facility.latitude && facility.longitude && (
-                          <p className="text-theme-text-secondary">
-                            {facility.latitude.toFixed(6)}, {facility.longitude.toFixed(6)}
-                          </p>
-                        )}
-                      </div>
-                      {selectedObject === facility.id.toString() && (
-                        <div className="w-4 h-4 bg-theme-accent rounded-full flex-shrink-0 mt-1"></div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          {/* ── Vehicle card ── */}
+          {!isRestricted && canSelectObjectsAndVehicles && (
+            <div style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius)",
+              padding: "14px 16px",
+              boxShadow: "var(--shadow-sm)",
+            }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                {t('work.vehicle.sectionTitle', 'Vehicle')}
+              </p>
 
-        {!isRestricted && canSelectObjectsAndVehicles && (
-          <div className="bg-theme-bg-card border border-theme-border rounded-xl p-4 mb-4">
-            <div className="flex flex-col gap-3">
-              <div>
-                <h2 className="text-lg font-bold text-theme-text-primary">
-                  {reservedVehicle && reservationRequest?.status === 'approved' 
-                    ? t('work.vehicle.alreadyReservedTitle') 
-                    : reservationRequest?.status === 'pending'
-                    ? t('work.vehicle.requestPendingTitle', 'Запрос на бронирование')
-                    : t('work.vehicle.sectionTitle')}
-                </h2>
-              </div>
               {isVehiclesLoading ? (
-                <div className="flex justify-center items-center py-4 text-sm text-theme-text-secondary">
-                  {t('common.loading')}
+                <div style={{ display: "flex", justifyContent: "center", padding: "12px 0" }}>
+                  <Loader2 size={18} className="animate-spin" color="var(--color-text-muted)" />
                 </div>
               ) : reservedVehicle && reservationRequest?.status === 'approved' ? (
                 <>
-                  <div className="bg-theme-accent/15 border border-theme-accent rounded-lg p-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <Car className="h-5 w-5 text-theme-text-primary flex-shrink-0" />
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-base font-semibold text-theme-text-primary truncate">
-                          {reservedVehicle.model || t('work.vehicle.unknownModel')}
-                        </span>
-                        <span className="text-sm text-theme-text-secondary truncate">
-                          {reservedVehicle.license_plate
-                            ? t('work.vehicle.licensePlate', { plate: reservedVehicle.license_plate })
-                            : t('work.vehicle.noLicensePlate')}
-                        </span>
-                      </div>
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+                    background: "var(--color-orange-bg)", border: "1px solid rgba(249,115,22,0.2)",
+                    borderRadius: "var(--radius-sm)", marginBottom: 10,
+                  }}>
+                    <Car size={18} color="var(--color-orange)" style={{ flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text-strong)" }}>{reservedVehicle.model}</div>
+                      <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>{reservedVehicle.license_plate}</div>
                     </div>
                   </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="w-full text-sm font-semibold py-2.5 h-auto"
-                    onClick={handleReleaseVehicle}
-                    disabled={isVehicleActionLoading}
-                  >
-                    {isVehicleActionLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="ml-2">{t('work.vehicle.releaseLoading')}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Unlock className="h-4 w-4" />
-                        <span className="ml-2">{t('work.vehicle.releaseButton')}</span>
-                      </>
-                    )}
-                  </Button>
+                  <button onClick={handleReleaseVehicle} disabled={isVehicleActionLoading} style={{
+                    width: "100%", height: 44, borderRadius: "var(--radius-sm)",
+                    background: "transparent", border: "1px solid var(--color-border)",
+                    color: "var(--color-text-muted)", fontSize: 13, fontWeight: 600,
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    cursor: "pointer",
+                  }}>
+                    {isVehicleActionLoading ? <Loader2 size={14} className="animate-spin" /> : <Unlock size={14} />}
+                    {t('work.vehicle.releaseButton', 'Release')}
+                  </button>
                 </>
               ) : reservationRequest ? (
-                <>
-                  <div className="border border-theme-border rounded-lg p-4 bg-theme-bg-card">
-                    <div className="flex flex-col gap-3">
-                      {/* Vehicle Info */}
-                      <div className="flex items-start gap-3">
-                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
-                          reservationRequest.status === 'pending'
-                            ? 'bg-amber-200 border-2 border-amber-400'
-                            : reservationRequest.status === 'rejected'
-                            ? 'bg-rose-200 border-2 border-rose-400'
-                            : 'bg-theme-accent/20 border-2 border-theme-accent/30'
-                        }`}>
-                          <Car className="h-6 w-6 text-theme-text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-lg font-bold text-theme-text-primary mb-1">
-                            {vehicles.find(v => v.id === reservationRequest.vehicle_id)?.model || t('work.vehicle.unknownModel')}
-                          </div>
-                          {vehicles.find(v => v.id === reservationRequest.vehicle_id)?.license_plate && (
-                            <div className="text-sm text-theme-text-secondary font-medium">
-                              {vehicles.find(v => v.id === reservationRequest.vehicle_id)?.license_plate}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Status Badge */}
-                      <div className="flex items-center gap-2">
-                        <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold ${
-                          reservationRequest.status === 'pending'
-                            ? 'bg-amber-200 text-amber-900 border border-amber-400'
-                            : reservationRequest.status === 'rejected'
-                            ? 'bg-rose-200 text-rose-900 border border-rose-400'
-                            : 'bg-slate-200 text-slate-900 border border-slate-400'
-                        }`}>
-                          {reservationRequest.status === 'pending' && (
-                            <>
-                              <Clock className="h-4 w-4 text-amber-900" />
-                              {t('work.vehicle.awaitingApproval', 'Ожидается подтверждение')}
-                            </>
-                          )}
-                          {reservationRequest.status === 'rejected' && (
-                            <>
-                              <X className="h-4 w-4 text-rose-900" />
-                              {t('work.vehicle.requestRejected', 'Запрос отклонен')}
-                            </>
-                          )}
-                          {reservationRequest.status === 'cancelled' && (
-                            <>
-                              <AlertCircle className="h-4 w-4 text-slate-900" />
-                              {t('work.vehicle.requestCancelled', 'Запрос отменен')}
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Dates Info */}
-                      {(reservationRequest.date_from || reservationRequest.date_to) && (
-                        <div className="text-sm text-theme-text-secondary space-y-1">
-                          {reservationRequest.date_from && (
-                            <div>
-                              <span className="font-medium text-theme-text-primary">{t('work.vehicle.dateFrom', 'Дата с')}:</span>{' '}
-                              {new Date(reservationRequest.date_from).toLocaleDateString(
-                                { 'ru': 'ru-RU', 'en': 'en-US', 'de': 'de-DE', 'uk': 'uk-UA' }[i18n.language] || 'en-US'
-                              )}
-                            </div>
-                          )}
-                          {reservationRequest.date_to && (
-                            <div>
-                              <span className="font-medium text-theme-text-primary">{t('work.vehicle.dateTo', 'Дата по')}:</span>{' '}
-                              {new Date(reservationRequest.date_to).toLocaleDateString(
-                                { 'ru': 'ru-RU', 'en': 'en-US', 'de': 'de-DE', 'uk': 'uk-UA' }[i18n.language] || 'en-US'
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Rejection Reason */}
-                      {reservationRequest.status === 'rejected' && reservationRequest.rejection_reason && (
-                        <div className="bg-rose-50 border border-rose-200 rounded-lg p-3">
-                          <div className="text-sm font-semibold text-rose-900 mb-1">
-                            {t('work.vehicle.rejectionReason', 'Причина отклонения')}:
-                          </div>
-                          <div className="text-sm text-rose-800">
-                            {reservationRequest.rejection_reason}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Date Info */}
-                      <div className="text-sm text-theme-text-secondary">
-                        <span className="font-medium text-theme-text-primary">{t('work.vehicle.requestCreatedAt', 'Запрос создан')}:</span>{' '}
-                        {new Date(reservationRequest.created_at).toLocaleString(
-                          { 'ru': 'ru-RU', 'en': 'en-US', 'de': 'de-DE', 'uk': 'uk-UA' }[i18n.language] || 'en-US'
-                        )}
-                      </div>
-
-                      {/* Cancel Button */}
-                      {reservationRequest.status === 'pending' && (
-                        <div className="flex justify-end pt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-sm font-semibold px-4 py-2 border-rose-400 text-rose-700 bg-rose-50"
-                            onClick={handleCancelRequest}
-                            disabled={isVehicleActionLoading}
-                          >
-                            {isVehicleActionLoading ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                {t('common.processing', 'Обработка...')}
-                              </>
-                            ) : (
-                              <>
-                                <X className="h-4 w-4 mr-2" />
-                                {t('work.vehicle.cancelRequest', 'Отменить запрос')}
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                <div style={{
+                  padding: "10px 12px", borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--color-border)", background: "var(--color-asphalt)",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <Car size={16} color="var(--color-text-muted)" />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text-strong)" }}>
+                      {vehicles.find(v => v.id === reservationRequest.vehicle_id)?.model || t('work.vehicle.unknownModel')}
+                    </span>
                   </div>
+                  <div style={{
+                    display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px",
+                    borderRadius: 99, fontSize: 11, fontWeight: 600,
+                    background: reservationRequest.status === 'pending' ? "rgba(234,179,8,0.15)" : "rgba(239,68,68,0.15)",
+                    color: reservationRequest.status === 'pending' ? "#CA8A04" : "#EF4444",
+                  }}>
+                    {reservationRequest.status === 'pending' ? <Clock size={11} /> : <X size={11} />}
+                    {reservationRequest.status === 'pending'
+                      ? t('work.vehicle.awaitingApproval', 'Pending')
+                      : t(`work.vehicle.request${reservationRequest.status.charAt(0).toUpperCase() + reservationRequest.status.slice(1)}`, reservationRequest.status)}
+                  </div>
+                  {reservationRequest.status === 'pending' && (
+                    <button onClick={handleCancelRequest} disabled={isVehicleActionLoading} style={{
+                      marginTop: 8, width: "100%", height: 36, borderRadius: "var(--radius-sm)",
+                      background: "transparent", border: "1px solid rgba(239,68,68,0.3)",
+                      color: "#EF4444", fontSize: 12, fontWeight: 600,
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      cursor: "pointer",
+                    }}>
+                      <X size={12} />
+                      {t('work.vehicle.cancelRequest', 'Cancel')}
+                    </button>
+                  )}
+                </div>
+              ) : availableVehicles.length > 0 ? (
+                <>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 200, overflowY: "auto", marginBottom: 10 }} className="custom-scrollbar">
+                    {availableVehicles.map((vehicle) => {
+                      const isSel = selectedVehicleId === vehicle.id;
+                      return (
+                        <button key={vehicle.id} onClick={() => handleSelectVehicle(vehicle.id)} style={{
+                          display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+                          borderRadius: "var(--radius-sm)", textAlign: "left",
+                          border: `1px solid ${isSel ? "var(--color-orange)" : "var(--color-border)"}`,
+                          background: isSel ? "var(--color-orange-bg)" : "transparent",
+                          cursor: "pointer", transition: "all var(--transition-fast)",
+                        }}>
+                          <Car size={16} color={isSel ? "var(--color-orange)" : "var(--color-text-muted)"} style={{ flexShrink: 0 }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-strong)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {vehicle.model || t('work.vehicle.unknownModel')}
+                            </div>
+                            <div style={{ fontSize: 11, color: "var(--color-text-muted)" }}>{vehicle.license_plate}</div>
+                          </div>
+                          {isSel && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-orange)", flexShrink: 0 }} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                    {[['dateFrom', dateFrom, setDateFrom, t('work.vehicle.dateFrom', 'From')], ['dateTo', dateTo, setDateTo, t('work.vehicle.dateTo', 'To')]] .map(([key, val, setter, label]) => (
+                      <label key={key as string} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        <span style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 500 }}>{label as string}</span>
+                        <input type="date" value={val as string}
+                          onChange={(e) => (setter as any)(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          style={{ padding: "8px 10px", fontSize: 13, background: "var(--color-asphalt)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", color: "var(--color-text-strong)" }}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <button onClick={handleReserveVehicle} disabled={!selectedVehicleId || !(dateFrom || dateTo) || isVehicleActionLoading} style={{
+                    width: "100%", height: 44, borderRadius: "var(--radius-sm)",
+                    background: selectedVehicleId && (dateFrom || dateTo) ? "var(--color-orange)" : "var(--color-asphalt)",
+                    border: "none", color: selectedVehicleId && (dateFrom || dateTo) ? "#fff" : "var(--color-text-muted)",
+                    fontSize: 14, fontWeight: 600,
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    cursor: selectedVehicleId && (dateFrom || dateTo) ? "pointer" : "not-allowed",
+                    transition: "all var(--transition-fast)",
+                  }}>
+                    {isVehicleActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Car size={16} />}
+                    {t('work.vehicle.createRequest', 'Request vehicle')}
+                  </button>
                 </>
               ) : (
-                <>
-                  {availableVehicles.length > 0 ? (
-                    <>
-                      <div className="bg-theme-bg-tertiary border border-theme-border rounded-lg p-2.5 flex items-center gap-2 mb-2">
-                        <Car className="h-4 w-4 text-theme-text-primary flex-shrink-0" />
-                        <span className="text-xs font-semibold text-theme-text-primary">
-                          {t('work.vehicle.availableCount', { count: availableVehicles.length })}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar -mx-1 px-1">
-                        {availableVehicles.map((vehicle) => {
-                          const isSelected = selectedVehicleId === vehicle.id;
-                          return (
-                            <button
-                              key={vehicle.id}
-                              type="button"
-                              onClick={() => handleSelectVehicle(vehicle.id)}
-                              className={`relative group w-full text-left bg-gradient-to-r from-theme-bg-secondary to-theme-bg-tertiary border-2 rounded-xl p-3.5 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md ${
-                                isSelected
-                                  ? 'border-theme-accent bg-theme-accent/10 shadow-lg shadow-theme-accent/20'
-                                  : 'border-theme-border hover:border-theme-accent/40'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center border ${
-                                  isSelected
-                                    ? 'bg-theme-accent border-theme-accent'
-                                    : 'bg-theme-accent/20 border-theme-accent/30'
-                                }`}>
-                                  <Car className={`h-5 w-5 ${isSelected ? 'text-white' : 'text-theme-text-primary'}`} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-base font-bold text-theme-text-primary truncate mb-0.5">
-                                    {vehicle.model || t('work.vehicle.unknownModel')}
-                                  </div>
-                                  <div className="text-xs font-medium text-theme-text-secondary">
-                                    {vehicle.license_plate || t('work.vehicle.noLicensePlate')}
-                                  </div>
-                                </div>
-                                <div className={`flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-md ${
-                                  isSelected
-                                    ? 'text-white bg-theme-accent'
-                                    : 'text-theme-accent bg-theme-accent/10'
-                                }`}>
-                                  {isSelected ? t('work.vehicle.selected', 'Выбрано') : t('work.vehicle.available', 'Доступно')}
-                                </div>
-                              </div>
-                              {isSelected && (
-                                <div className="absolute top-2 right-2 w-2 h-2 bg-theme-accent rounded-full animate-pulse" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      
-                      {/* Date Selection */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                        <label className="flex flex-col gap-1.5">
-                          <span className="text-xs font-medium text-theme-text-primary flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {t('work.vehicle.dateFrom', 'Дата с')}
-                          </span>
-                          <input
-                            type="date"
-                            value={dateFrom}
-                            onChange={(e) => setDateFrom(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-theme-border rounded-lg bg-theme-bg-secondary text-theme-text-primary focus:ring-2 focus:ring-theme-accent focus:border-transparent"
-                            min={new Date().toISOString().split('T')[0]}
-                          />
-                        </label>
-                        <label className="flex flex-col gap-1.5">
-                          <span className="text-xs font-medium text-theme-text-primary flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {t('work.vehicle.dateTo', 'Дата по')}
-                          </span>
-                          <input
-                            type="date"
-                            value={dateTo}
-                            onChange={(e) => setDateTo(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-theme-border rounded-lg bg-theme-bg-secondary text-theme-text-primary focus:ring-2 focus:ring-theme-accent focus:border-transparent"
-                            min={dateFrom || new Date().toISOString().split('T')[0]}
-                          />
-                        </label>
-                      </div>
-                      
-                      <Button
-                        size="sm"
-                        className={`w-full text-sm font-bold py-3 h-auto shadow-lg mt-3 transition-all ${
-                          selectedVehicleId && (dateFrom || dateTo)
-                            ? 'bg-theme-accent hover:bg-theme-accent/90 text-white'
-                            : 'bg-theme-bg-tertiary text-theme-text-muted border border-theme-border'
-                        }`}
-                        onClick={handleReserveVehicle}
-                        disabled={!selectedVehicleId || !(dateFrom || dateTo) || isVehicleActionLoading}
-                      >
-                        {isVehicleActionLoading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span className="ml-2">{t('work.vehicle.reserveLoading', 'Бронирование...')}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Car className="h-4 w-4" />
-                            <span className="ml-2">
-                              {!selectedVehicleId
-                                ? t('work.vehicle.selectVehicleFirst', 'Выберите авто')
-                                : !(dateFrom || dateTo)
-                                ? t('work.vehicle.selectDateFirst', 'Выберите дату')
-                                : t('work.vehicle.createRequest', 'Подать запрос')
-                              }
-                            </span>
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="text-center py-6">
-                      <div className="text-sm text-theme-text-muted">
-                        {t('work.vehicle.noAvailable')}
-                      </div>
-                    </div>
-                  )}
-                </>
+                <p style={{ fontSize: 13, color: "var(--color-text-muted)", textAlign: "center", padding: "12px 0" }}>
+                  {t('work.vehicle.noAvailable', 'No vehicles available')}
+                </p>
               )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Управление сменами (только для неофисных работников) */}
-        {canSelectObjectsAndVehicles && (
-          <div className="bg-theme-bg-card border border-theme-border rounded-xl p-6 mb-6">
-            <h2 className="text-2xl font-bold text-theme-text-primary mb-4">
-              {t('work.shift.title', 'Рабочая смена')}
-            </h2>
-            {activeWorkShift ? (
-              <div className="space-y-4">
-                <div className="bg-theme-accent/20 border border-theme-accent rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-theme-text-primary">
-                      {t('work.shift.active')}
-                    </span>
-                    <Badge className="bg-green-500 text-white">
-                      {t('work.shift.activeBadge')}
-                    </Badge>
-                  </div>
-                  <div className="text-sm text-theme-text-secondary space-y-1">
-                    <div>
-                      <span className="font-medium">{t('work.shift.startTime', 'Начало')}:</span>{' '}
-                      {new Date(activeWorkShift.start_time).toLocaleString(
-                        { 'ru': 'ru-RU', 'en': 'en-US', 'de': 'de-DE', 'uk': 'uk-UA' }[i18n.language] || 'en-US'
-                      )}
-                    </div>
-                    {activeWorkShift.object_time > 0 && (
-                      <div>
-                        <span className="font-medium">{t('work.shift.objectTime', 'Время на объектах')}:</span>{' '}
-                        {Math.floor(activeWorkShift.object_time / 3600)}ч {Math.floor((activeWorkShift.object_time % 3600) / 60)}м
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  variant="destructive"
-                  size="lg"
-                  className="w-full text-lg font-semibold gap-3"
-                  onClick={handleEndShift}
-                  disabled={isShiftActionLoading || isWorking}
-                >
-                  {isShiftActionLoading ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      {t('work.shift.ending', 'Завершение...')}
-                    </>
-                  ) : (
-                    <>
-                      <Square className="h-5 w-5" />
-                      {t('work.shift.end', 'Завершить смену')}
-                    </>
-                  )}
-                </Button>
-                {isWorking && (
-                  <p className="text-sm text-amber-600 mt-2 text-center">
-                    {t('work.shift.cannotEndWhileWorking', 'Нельзя завершить смену, пока не завершена работа на объекте')}
-                  </p>
-                )}
+          {/* ── Main CTA ── */}
+          <div style={{ paddingTop: 4 }}>
+            {isRestricted ? (
+              <div style={{
+                padding: "16px", borderRadius: "var(--radius)",
+                background: "var(--color-asphalt)", border: "1px solid var(--color-border)",
+                textAlign: "center", color: "var(--color-text-muted)", fontSize: 14,
+              }}>
+                {t('work.waitForAdminApproval', 'Wait for admin approval')}
               </div>
             ) : (
-              <Button
-                variant="default"
-                size="lg"
-                className="w-full text-lg font-semibold gap-3"
-                onClick={handleStartShift}
-                disabled={isShiftActionLoading}
-              >
-                {isShiftActionLoading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    {t('work.shift.starting', 'Начало...')}
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-5 w-5" />
-                    {t('work.shift.start', 'Начать смену')}
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
-        )}
-
-        {!isWorking ? (
-          <div className="bg-theme-bg-card border border-theme-border rounded-xl p-6">
-            <div className="text-center">
-              <div>
-                <h2 className="text-2xl font-bold text-theme-text-primary mb-4">
-                  {t('work.readyToStart')}
-                </h2>
-                {isRestricted ? (
-                  <p className="text-theme-text-secondary text-lg font-medium">{t('work.waitForAdminApproval', 'Wait for admin approval')}</p>
-                ) : (
-                  <>
-                    <button
-                      onClick={handleStartWork}
-                      disabled={
-                        (canChooseWorkType && workType === 'facility' && !selectedObject) ||
-                        (!canChooseWorkType && canSelectObjectsAndVehicles && !selectedObject) ||
-                        (canSelectObjectsAndVehicles && (canChooseWorkType ? workType === 'facility' : true) && !activeWorkShift) ||
-                        isStartingWork
-                      }
-                      className={`px-8 py-4 rounded-xl text-xl font-bold transition-all flex items-center gap-3 mx-auto ${
-                        ((canChooseWorkType && workType === 'office') ||
-                         (canChooseWorkType && workType === 'facility' && selectedObject && activeWorkShift) ||
-                         (!canChooseWorkType && canSelectObjectsAndVehicles && selectedObject && activeWorkShift) ||
-                         (!canSelectObjectsAndVehicles)) && !isStartingWork
-                          ? 'bg-theme-accent hover:bg-theme-accent-hover text-white shadow-lg hover:shadow-xl'
-                          : 'bg-theme-bg-tertiary text-theme-text-muted cursor-not-allowed'
-                      }`}
-                    >
-                      {isStartingWork ? (
-                        <>
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                          {t('work.startingWork')}
-                        </>
-                      ) : (
-                        <>
-                          <Play className="h-6 w-6" />
-                          {t('work.startWork')}
-                        </>
-                      )}
-                    </button>
-                    {((canChooseWorkType && workType === 'facility' && !selectedObject) ||
-                      (!canChooseWorkType && canSelectObjectsAndVehicles && !selectedObject)) && (
-                      <p className="text-theme-text-muted mt-3">
-                        {t('work.selectObjectFirst')}
-                      </p>
-                    )}
-                    {canSelectObjectsAndVehicles && (canChooseWorkType ? workType === 'facility' : true) && !activeWorkShift && (
-                      <p className="text-theme-text-muted mt-3">
-                        {t('work.shift.startFirst', 'Сначала необходимо начать смену')}
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="bg-theme-bg-card border border-theme-border rounded-xl text-center p-6">
-              <div>
-                <h2 className="text-2xl font-bold text-theme-text-primary mb-4">
-                  {t('work.working')}
-                </h2>
-                <div className="bg-theme-accent/20 border border-theme-accent rounded-xl p-4 mb-6">
-                  <p className="text-theme-text-primary font-medium">
-                    {canSelectObjectsAndVehicles 
-                      ? `${t('work.currentObject')}: ${facilities.find(facility => facility.id.toString() === selectedObject)?.name || t('work.unnamedObject')}`
-                      : `${t('work.workPlace')}: ${t('work.office')}`
-                    }
-                  </p>
-                </div>
-                <button
-                  onClick={handleStopWork}
-                  className="px-8 py-4 rounded-xl text-xl font-bold bg-theme-error hover:bg-theme-error/80 text-white shadow-lg hover:shadow-xl transition-all flex items-center gap-3 mx-auto"
-                >
-                  <Square className="h-6 w-6" />
-                  {t('work.stopWork')}
+              <>
+                <button onClick={handleStartWork} disabled={!startBtnEnabled} style={{
+                  width: "100%", height: 58, borderRadius: "var(--radius)",
+                  background: startBtnEnabled
+                    ? "linear-gradient(135deg, var(--color-orange) 0%, var(--color-orange-accent) 100%)"
+                    : "var(--color-asphalt)",
+                  border: "none",
+                  color: startBtnEnabled ? "#fff" : "var(--color-text-muted)",
+                  fontSize: 17, fontWeight: 700, letterSpacing: "0.01em",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                  cursor: startBtnEnabled ? "pointer" : "not-allowed",
+                  boxShadow: startBtnEnabled ? "0 4px 20px rgba(249,115,22,0.35)" : "none",
+                  transition: "all var(--transition-normal)",
+                }}>
+                  {isStartingWork
+                    ? <><Loader2 size={22} className="animate-spin" />{t('work.startingWork', 'Starting...')}</>
+                    : <><Play size={22} />{t('work.startWork', 'Start work')}</>
+                  }
                 </button>
 
-                {canSelectObjectsAndVehicles && (
-                  <div className="mt-6 text-center">
-                    <button
-                      onClick={handleTelegramGroup}
-                      className="inline-flex items-center gap-3 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-                    >
-                      <MessageCircle className="h-5 w-5" />
-                      {t('work.joinTelegramGroup')}
-                    </button>
-                  </div>
+                {/* Hint messages */}
+                {!startBtnEnabled && !isRestricted && (
+                  <p style={{ fontSize: 12, color: "var(--color-text-muted)", textAlign: "center", marginTop: 8 }}>
+                    {canSelectObjectsAndVehicles && (canChooseWorkType ? workType === 'facility' : true) && !activeWorkShift
+                      ? t('work.shift.startFirst', 'Start a shift first')
+                      : t('work.selectObjectFirst', 'Select an object first')}
+                  </p>
                 )}
-              </div>
-            </div>
-            <div className="bg-theme-bg-card mt-6 border border-theme-border text-center rounded-xl p-6">
-              <div className="text-xl font-semibold text-theme-text-primary mb-3">{t('work.todoList')}</div>
-              <TodoList
-                embedded
-                facilityId={selectedObject ? Number(selectedObject) : null}
-                facilityTypeId={facilities.find(f => f.id.toString() === selectedObject)?.facility_type_id ?? null}
-              />
-            </div>
-          </>
-        )}
-      </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
 
-      {/* Диалог делегирования задач */}
+      {/* ── Delegate task dialog ── */}
       <DelegateTaskDialog
         open={isDelegateTaskDialogOpen}
         onOpenChange={setIsDelegateTaskDialogOpen}
