@@ -2,7 +2,7 @@ import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import i18n from '@/i18n/config';
-import { Play, Square, MapPin, MessageCircle, ListChecks, Car, Unlock, Loader2, Clock, X, UserPlus } from 'lucide-react';
+import { Play, Square, MapPin, MessageCircle, ListChecks, Car, Unlock, Loader2, Clock, X, UserPlus, ChevronRight, Rocket, Lock, Calendar } from 'lucide-react';
 import { getFacilities } from '../../../requests/facility';
 import { FacilityOut } from '../../../requests/facility/types';
 import { startWork, startWorkOffice, getActiveWorkProcess } from '../../../requests/work';
@@ -939,62 +939,36 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
           onClose={() => setErrorDetails(null)}
         />
       )}
-        
+
       {/* ── Header ── */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
         <div>
-          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: 4 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-orange)", marginBottom: 4 }}>
             {formatToday()}
           </p>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: "var(--color-text-strong)", letterSpacing: "-0.03em", lineHeight: 1.1, margin: 0 }}>
-            {isWorking ? t('work.working', 'В роботі') : t('work.title', 'Робота')}
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--color-text-strong)", letterSpacing: "-0.02em", lineHeight: 1.1, margin: 0, textTransform: "uppercase" }}>
+            {isWorking ? t('work.working', 'В РОБОТІ') : t('work.title', 'РОБОТА')}
           </h1>
-          {user?.worker_type && (
-            <span style={{
-              display: "inline-block", marginTop: 8,
-              fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
-              padding: "3px 10px", borderRadius: "var(--radius-full)",
-              background: "var(--color-orange-bg)",
-              border: "1px solid rgba(249,115,22,0.3)",
-              color: "var(--color-orange)",
-              textTransform: "uppercase",
-              boxShadow: "0 0 12px rgba(249,115,22,0.15)",
-            }}>
-              {t(`admin.workers.types.${user.worker_type}`, user.worker_type)}
-            </span>
-          )}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
-          <button onClick={() => setIsDelegateTaskDialogOpen(true)} style={{
-            height: 38, padding: "0 12px", borderRadius: "var(--radius-sm)",
-            border: "1px solid var(--color-border)",
-            background: "var(--glass-bg)", backdropFilter: "blur(20px)",
-            display: "flex", alignItems: "center", gap: 6,
-            cursor: "pointer", color: "var(--color-text-muted)",
-            fontSize: 12, fontWeight: 600, whiteSpace: "nowrap",
+        {user?.worker_type && (
+          <span style={{
+            marginTop: 4, flexShrink: 0,
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+            padding: "5px 14px", borderRadius: "var(--radius-full)",
+            background: "var(--color-orange)",
+            color: "#fff", textTransform: "uppercase",
+            boxShadow: "0 4px 12px rgba(249,115,22,0.35)",
           }}>
-            <UserPlus size={13} />
-            {t('work.delegateTask.button', 'Делегувати')}
-          </button>
-          <button onClick={onShowHistory} style={{
-            height: 38, padding: "0 12px", borderRadius: "var(--radius-sm)",
-            border: "1px solid rgba(249,115,22,0.35)",
-            background: "rgba(249,115,22,0.08)",
-            display: "flex", alignItems: "center", gap: 6,
-            cursor: "pointer", color: "var(--color-orange)",
-            fontSize: 12, fontWeight: 600, whiteSpace: "nowrap",
-          }}>
-            <ListChecks size={13} />
-            {t('work.history.viewButton', 'Історія')}
-          </button>
-        </div>
+            {t(`admin.workers.types.${user.worker_type}`, user.worker_type).toUpperCase()}
+          </span>
+        )}
       </div>
 
       {/* ── WORKING STATE ── */}
       {isWorking ? (
         <>
           <div className="glass" style={{
-            borderRadius: "var(--radius-lg)", padding: 16,
+            borderRadius: 20, padding: 16,
             border: "1px solid rgba(249,115,22,0.2)",
             boxShadow: "0 0 32px rgba(249,115,22,0.12)",
           }}>
@@ -1006,51 +980,51 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
                 animation: "pulse 2s infinite", flexShrink: 0,
               }} />
               <span style={{ fontSize: 10, fontWeight: 700, color: "var(--color-success)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                {t('work.working', 'Активна робота')}
+                {t('work.working', 'АКТИВНА РОБОТА')}
               </span>
             </div>
             <div style={{
-              display: "flex", alignItems: "center", gap: 10,
-              padding: "12px 14px",
+              display: "flex", alignItems: "center", gap: 12,
+              padding: "14px 16px",
               background: "var(--color-orange-bg)",
               border: "1px solid rgba(249,115,22,0.25)",
-              borderRadius: "var(--radius-sm)", marginBottom: 14,
+              borderRadius: 14, marginBottom: 14,
               boxShadow: "0 0 20px rgba(249,115,22,0.12)",
             }}>
-              <MapPin size={16} color="var(--color-orange)" style={{ flexShrink: 0 }} />
-              <span style={{ fontSize: 15, fontWeight: 700, color: "var(--color-text-strong)" }}>
+              <MapPin size={18} color="var(--color-orange)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 16, fontWeight: 700, color: "var(--color-text-strong)" }}>
                 {canSelectObjectsAndVehicles
                   ? (selectedFacility?.name || t('work.unnamedObject'))
                   : t('work.office', 'Офіс')}
               </span>
             </div>
             <button onClick={handleStopWork} style={{
-              width: "100%", height: 52, borderRadius: "var(--radius-sm)",
+              width: "100%", padding: "18px", borderRadius: 14,
               background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
-              color: "#EF4444", fontSize: 15, fontWeight: 700,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              color: "#EF4444", fontSize: 15, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
               cursor: "pointer", marginBottom: 10,
             }}>
               <Square size={18} />
-              {t('work.stopWork', 'Зупинити роботу')}
+              {t('work.stopWork', 'ЗУПИНИТИ РОБОТУ')}
             </button>
             {canSelectObjectsAndVehicles && (
               <button onClick={handleTelegramGroup} style={{
-                width: "100%", height: 44, borderRadius: "var(--radius-sm)",
-                background: "transparent", border: "1px solid var(--color-border)",
-                color: "var(--color-text-muted)", fontSize: 13, fontWeight: 600,
+                width: "100%", height: 44, borderRadius: 12,
+                background: "transparent", border: "1px solid rgba(255,255,255,0.08)",
+                color: "var(--color-text-muted)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 cursor: "pointer",
               }}>
                 <MessageCircle size={15} />
-                {t('work.joinTelegramGroup', 'Telegram група')}
+                {t('work.joinTelegramGroup', 'TELEGRAM ГРУПА')}
               </button>
             )}
           </div>
 
-          <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: 16, border: "1px solid var(--color-border)" }}>
+          <div className="glass" style={{ borderRadius: 20, padding: 16, border: "1px solid rgba(255,255,255,0.08)" }}>
             <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
-              {t('work.todoList', 'Завдання')}
+              {t('work.todoList', 'ЗАВДАННЯ')}
             </p>
             <TodoList
               embedded
@@ -1061,78 +1035,185 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
         </>
       ) : (
         <>
-          {/* ── Work type toggle (foreman/engineer/assistant) ── */}
+          {/* ── Bento action grid ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <button
+              onClick={() => setIsDelegateTaskDialogOpen(true)}
+              className="glass"
+              style={{
+                padding: 16, borderRadius: 20, height: 120,
+                display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-start",
+                border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer",
+                transition: "transform 0.15s ease",
+              }}
+            >
+              <UserPlus size={28} color="var(--color-orange)" />
+              <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-text-muted)", textAlign: "left", lineHeight: 1.4 }}>
+                {t('work.delegateTask.button', 'ДЕЛЕГУВАТИ ЗАДАЧУ')}
+              </span>
+            </button>
+            <button
+              onClick={onShowHistory}
+              className="glass"
+              style={{
+                padding: 16, borderRadius: 20, height: 120,
+                display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-start",
+                border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer",
+                transition: "transform 0.15s ease",
+              }}
+            >
+              <ListChecks size={28} color="#6c94ff" />
+              <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-text-muted)", textAlign: "left", lineHeight: 1.4 }}>
+                {t('work.history.viewButton', 'ІСТОРІЯ РОБІТ')}
+              </span>
+            </button>
+          </div>
+
+          {/* ── Work type toggle ── */}
           {canChooseWorkType && (
-            <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: "14px 16px", border: "1px solid var(--color-border)" }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
-                {t('work.selectWorkType', 'Work type')}
-              </p>
+            <div className="glass" style={{ borderRadius: 20, padding: 16, border: "1px solid rgba(255,255,255,0.08)", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <MapPin size={16} color="var(--color-orange)" />
+                <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-text-muted)" }}>
+                  {t('work.selectWorkType', 'ТИП РОБОТИ')}
+                </span>
+              </div>
               <div style={{ display: "flex", gap: 8 }}>
-                {([['facility', MapPin, t('work.workTypeFacility', 'On-site')] , ['office', MessageCircle, t('work.workTypeOffice', 'Office')]] as const).map(([type, Icon, label]) => (
+                {([['facility', MapPin, t('work.workTypeFacility', "НА ОБ'ЄКТІ")] , ['office', MessageCircle, t('work.workTypeOffice', 'ОФІС')]] as const).map(([type, Icon, label]) => (
                   <button key={type} onClick={() => setWorkType(type as 'facility' | 'office')} style={{
-                    flex: 1, height: 52, borderRadius: "var(--radius-sm)",
-                    border: `1px solid ${workType === type ? "var(--color-orange)" : "rgba(255,255,255,0.08)"}`,
+                    flex: 1, height: 52, borderRadius: 12,
+                    border: `1px solid ${workType === type ? "rgba(249,115,22,0.5)" : "rgba(255,255,255,0.08)"}`,
                     background: workType === type ? "var(--color-orange-bg)" : "rgba(255,255,255,0.03)",
                     color: workType === type ? "var(--color-orange)" : "var(--color-text-muted)",
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
-                    cursor: "pointer", transition: "all var(--transition-fast)",
+                    cursor: "pointer",
                     boxShadow: workType === type ? "0 0 16px rgba(249,115,22,0.18)" : "none",
                   }}>
                     <Icon size={18} />
-                    <span style={{ fontSize: 11, fontWeight: 600 }}>{label}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
+          {/* ── Shift / Working day card ── */}
+          {canSelectObjectsAndVehicles && (
+            <div className="glass" style={{ borderRadius: 20, padding: 16, border: "1px solid rgba(255,255,255,0.08)", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Clock size={16} color="var(--color-orange)" />
+                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-text-muted)" }}>
+                    {t('work.shift.title', 'РОБОЧИЙ ДЕНЬ')}
+                  </span>
+                </div>
+                {activeWorkShift && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 99,
+                    background: "rgba(34,197,94,0.12)", color: "var(--color-success)",
+                    border: "1px solid rgba(34,197,94,0.2)", letterSpacing: "0.06em", textTransform: "uppercase",
+                  }}>
+                    {t('work.shift.activeBadge', 'АКТИВНА')}
+                  </span>
+                )}
+              </div>
+              {activeWorkShift ? (
+                <>
+                  <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginBottom: 12 }}>
+                    {t('work.shift.startTime', 'Початок')}: {new Date(activeWorkShift.start_time).toLocaleTimeString()}
+                  </p>
+                  <button onClick={handleEndShift} disabled={isShiftActionLoading || isWorking} style={{
+                    width: "100%", padding: "18px", borderRadius: 14,
+                    background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
+                    color: "#EF4444", fontSize: 15, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                    cursor: isShiftActionLoading || isWorking ? "not-allowed" : "pointer",
+                    opacity: isShiftActionLoading || isWorking ? 0.5 : 1,
+                  }}>
+                    {isShiftActionLoading ? <Loader2 size={20} className="animate-spin" /> : <Square size={20} />}
+                    {t('work.shift.end', 'ЗАВЕРШИТИ ДЕНЬ')}
+                  </button>
+                  {isWorking && (
+                    <p style={{ fontSize: 11, color: "#EAB308", textAlign: "center", marginTop: 8 }}>
+                      {t('work.shift.cannotEndWhileWorking')}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <button onClick={handleStartShift} disabled={isShiftActionLoading} style={{
+                  width: "100%", padding: "20px", borderRadius: 14,
+                  background: "var(--color-orange)", border: "none",
+                  color: "#fff", fontSize: 17, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
+                  cursor: isShiftActionLoading ? "not-allowed" : "pointer",
+                  boxShadow: "0 4px 20px rgba(249,115,22,0.35)",
+                  transition: "all var(--transition-fast)",
+                }}>
+                  {isShiftActionLoading ? <Loader2 size={22} className="animate-spin" /> : <Play size={22} />}
+                  {t('work.shift.start', 'ПОЧАТИ РОБОЧИЙ ДЕНЬ')}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* ── Object selector ── */}
           {canSelectObjectsAndVehicles && workType !== 'office' && (
-            <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: "14px 16px", border: "1px solid var(--color-border)" }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
-                {t('work.selectObject', 'Select object')}
-              </p>
+            <div className="glass" style={{ borderRadius: 20, padding: 16, border: "1px solid rgba(255,255,255,0.08)", marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <MapPin size={16} color="var(--color-orange)" />
+                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-text-muted)" }}>
+                    {t('work.selectObject', "ОБЕРІТЬ ОБ'ЄКТ")}
+                  </span>
+                </div>
+                {facilities.length > 0 && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6,
+                    background: "rgba(255,255,255,0.08)", color: "var(--color-text-muted)", letterSpacing: "0.04em",
+                  }}>
+                    {facilities.length} {t('work.objectsCount', "ОБ'ЄКТІВ")}
+                  </span>
+                )}
+              </div>
               {isLoading ? (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 64 }}>
                   <Loader2 size={20} className="animate-spin" color="var(--color-text-muted)" />
                 </div>
               ) : facilities.length === 0 ? (
                 <p style={{ fontSize: 14, color: "var(--color-text-muted)", textAlign: "center", padding: "16px 0" }}>
-                  {t('work.noObjects', 'No objects')}
+                  {t('work.noObjects', "Немає об'єктів")}
                 </p>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 260, overflowY: "auto" }} className="custom-scrollbar">
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 260, overflowY: "auto" }} className="custom-scrollbar">
                   {facilities.map((facility) => {
                     const selected = selectedObject === facility.id.toString();
                     return (
                       <button key={facility.id} onClick={() => onObjectSelect(facility.id.toString())} style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: "12px 14px",
-                        borderRadius: "var(--radius-sm)",
-                        border: `1px solid ${selected ? "rgba(249,115,22,0.5)" : "rgba(255,255,255,0.06)"}`,
-                        background: selected ? "var(--color-orange-bg)" : "rgba(255,255,255,0.03)",
-                        cursor: "pointer", textAlign: "left",
-                        transition: "all var(--transition-fast)",
-                        boxShadow: selected ? "0 0 16px rgba(249,115,22,0.15)" : "none",
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "12px 14px", borderRadius: 14, textAlign: "left",
+                        border: `1px solid ${selected ? "rgba(249,115,22,0.45)" : "rgba(255,255,255,0.06)"}`,
+                        background: selected ? "var(--color-orange-bg)" : "rgba(255,255,255,0.04)",
+                        cursor: "pointer",
+                        boxShadow: selected ? "0 0 18px rgba(249,115,22,0.14)" : "none",
                       }}>
-                        <div style={{
-                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                          background: selected ? "var(--color-orange)" : "rgba(255,255,255,0.06)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                        }}>
-                          <MapPin size={14} color={selected ? "#fff" : "var(--color-text-muted)"} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 14, fontWeight: 600, color: selected ? "var(--color-text-strong)" : "var(--color-text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {facility.name || t('work.unnamedObject')}
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <div style={{
+                            width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                            background: selected ? "var(--color-orange)" : "rgba(255,255,255,0.07)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                          }}>
+                            <MapPin size={16} color={selected ? "#fff" : "var(--color-text-muted)"} />
                           </div>
-                          {facility.status_active === false && (
-                            <div style={{ fontSize: 11, color: "var(--color-text-muted)" }}>inactive</div>
-                          )}
+                          <div>
+                            <div style={{ fontSize: 15, fontWeight: 600, color: "var(--color-text-strong)", lineHeight: 1.1 }}>
+                              {facility.name || t('work.unnamedObject')}
+                            </div>
+                            {facility.status_active === false && (
+                              <div style={{ fontSize: 10, color: "var(--color-text-muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>inactive</div>
+                            )}
+                          </div>
                         </div>
-                        {selected && (
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--color-orange)", flexShrink: 0, boxShadow: "0 0 8px rgba(249,115,22,0.6)" }} />
-                        )}
+                        <ChevronRight size={18} color="rgba(255,255,255,0.2)" style={{ flexShrink: 0 }} />
                       </button>
                     );
                   })}
@@ -1141,68 +1222,22 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
             </div>
           )}
 
-          {/* ── Shift card ── */}
-          {canSelectObjectsAndVehicles && (
-            <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: "14px 16px", border: "1px solid var(--color-border)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: activeWorkShift ? 10 : 0 }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                  {t('work.shift.title', 'Shift')}
-                </p>
-                {activeWorkShift && (
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: "var(--radius-full)",
-                    background: "rgba(34,197,94,0.12)", color: "var(--color-success)",
-                    border: "1px solid rgba(34,197,94,0.2)", letterSpacing: "0.06em", textTransform: "uppercase",
-                  }}>
-                    {t('work.shift.activeBadge', 'Active')}
+          {/* ── Vehicle booking ── */}
+          {!isRestricted && canSelectObjectsAndVehicles && (
+            <div className="glass" style={{ borderRadius: 20, padding: 16, border: "1px solid rgba(255,255,255,0.08)", marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Car size={16} color="var(--color-orange)" />
+                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-text-muted)" }}>
+                    {t('work.vehicle.sectionTitle', 'БРОНЮВАННЯ АВТО')}
+                  </span>
+                </div>
+                {availableVehicles.length > 0 && !reservedVehicle && !reservationRequest && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "var(--color-orange)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    {t('work.vehicle.availableCount', 'ДОСТУПНИХ')}: {availableVehicles.length}
                   </span>
                 )}
               </div>
-
-              {activeWorkShift ? (
-                <>
-                  <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginBottom: 10 }}>
-                    {t('work.shift.startTime', 'Started')}: {new Date(activeWorkShift.start_time).toLocaleTimeString()}
-                  </p>
-                  <button onClick={handleEndShift} disabled={isShiftActionLoading || isWorking} style={{
-                    width: "100%", height: 48, borderRadius: "var(--radius-sm)",
-                    background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
-                    color: "#EF4444", fontSize: 14, fontWeight: 600,
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                    cursor: isShiftActionLoading || isWorking ? "not-allowed" : "pointer",
-                    opacity: isShiftActionLoading || isWorking ? 0.5 : 1,
-                  }}>
-                    {isShiftActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Square size={16} />}
-                    {t('work.shift.end', 'End shift')}
-                  </button>
-                  {isWorking && (
-                    <p style={{ fontSize: 11, color: "#EAB308", textAlign: "center", marginTop: 6 }}>
-                      {t('work.shift.cannotEndWhileWorking')}
-                    </p>
-                  )}
-                </>
-              ) : (
-                <button onClick={handleStartShift} disabled={isShiftActionLoading} style={{
-                  width: "100%", height: 48, borderRadius: "var(--radius-sm)",
-                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                  color: "var(--color-text-strong)", fontSize: 14, fontWeight: 600,
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  cursor: isShiftActionLoading ? "not-allowed" : "pointer",
-                  marginTop: 10,
-                }}>
-                  {isShiftActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
-                  {t('work.shift.start', 'Start shift')}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* ── Vehicle card ── */}
-          {!isRestricted && canSelectObjectsAndVehicles && (
-            <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: "14px 16px", border: "1px solid var(--color-border)" }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
-                {t('work.vehicle.sectionTitle', 'Vehicle')}
-              </p>
 
               {isVehiclesLoading ? (
                 <div style={{ display: "flex", justifyContent: "center", padding: "12px 0" }}>
@@ -1211,161 +1246,174 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
               ) : reservedVehicle && reservationRequest?.status === 'approved' ? (
                 <>
                   <div style={{
-                    display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+                    display: "flex", alignItems: "center", gap: 12, padding: "12px 14px",
                     background: "var(--color-orange-bg)", border: "1px solid rgba(249,115,22,0.25)",
-                    borderRadius: "var(--radius-sm)", marginBottom: 10,
+                    borderRadius: 14, marginBottom: 12,
                     boxShadow: "0 0 20px rgba(249,115,22,0.12)",
                   }}>
-                    <Car size={18} color="var(--color-orange)" style={{ flexShrink: 0 }} />
+                    <Car size={20} color="var(--color-orange)" style={{ flexShrink: 0 }} />
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text-strong)" }}>{reservedVehicle.model}</div>
-                      <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>{reservedVehicle.license_plate}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)", letterSpacing: "0.06em", marginBottom: 2 }}>{reservedVehicle.model}</div>
+                      <div style={{ fontSize: 18, fontWeight: 600, color: "var(--color-text-strong)", lineHeight: 1 }}>{reservedVehicle.license_plate}</div>
                     </div>
                   </div>
                   <button onClick={handleReleaseVehicle} disabled={isVehicleActionLoading} style={{
-                    width: "100%", height: 44, borderRadius: "var(--radius-sm)",
-                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                    color: "var(--color-text-muted)", fontSize: 13, fontWeight: 600,
+                    width: "100%", height: 44, borderRadius: 12,
+                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                    color: "var(--color-text-muted)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em",
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                     cursor: "pointer",
                   }}>
                     {isVehicleActionLoading ? <Loader2 size={14} className="animate-spin" /> : <Unlock size={14} />}
-                    {t('work.vehicle.releaseButton', 'Release')}
+                    {t('work.vehicle.releaseButton', 'ЗВІЛЬНИТИ')}
                   </button>
                 </>
               ) : reservationRequest ? (
                 <div style={{
-                  padding: "10px 12px", borderRadius: "var(--radius-sm)",
+                  padding: "12px 14px", borderRadius: 14,
                   border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)",
                 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <Car size={16} color="var(--color-text-muted)" />
-                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text-strong)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                    <Car size={18} color="var(--color-text-muted)" />
+                    <span style={{ fontSize: 15, fontWeight: 600, color: "var(--color-text-strong)" }}>
                       {vehicles.find(v => v.id === reservationRequest.vehicle_id)?.model || t('work.vehicle.unknownModel')}
                     </span>
                   </div>
                   <div style={{
-                    display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px",
-                    borderRadius: 99, fontSize: 11, fontWeight: 600,
+                    display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px",
+                    borderRadius: 99, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em",
                     background: reservationRequest.status === 'pending' ? "rgba(234,179,8,0.15)" : "rgba(239,68,68,0.15)",
                     color: reservationRequest.status === 'pending' ? "#CA8A04" : "#EF4444",
                   }}>
                     {reservationRequest.status === 'pending' ? <Clock size={11} /> : <X size={11} />}
                     {reservationRequest.status === 'pending'
-                      ? t('work.vehicle.awaitingApproval', 'Pending')
+                      ? t('work.vehicle.awaitingApproval', 'ОЧІКУЄ ПІДТВЕРДЖЕННЯ')
                       : t(`work.vehicle.request${reservationRequest.status.charAt(0).toUpperCase() + reservationRequest.status.slice(1)}`, reservationRequest.status)}
                   </div>
                   {reservationRequest.status === 'pending' && (
                     <button onClick={handleCancelRequest} disabled={isVehicleActionLoading} style={{
-                      marginTop: 8, width: "100%", height: 36, borderRadius: "var(--radius-sm)",
+                      marginTop: 10, width: "100%", height: 38, borderRadius: 10,
                       background: "transparent", border: "1px solid rgba(239,68,68,0.3)",
-                      color: "#EF4444", fontSize: 12, fontWeight: 600,
+                      color: "#EF4444", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em",
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                       cursor: "pointer",
                     }}>
                       <X size={12} />
-                      {t('work.vehicle.cancelRequest', 'Cancel')}
+                      {t('work.vehicle.cancelRequest', 'СКАСУВАТИ')}
                     </button>
                   )}
                 </div>
               ) : availableVehicles.length > 0 ? (
                 <>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 200, overflowY: "auto", marginBottom: 10 }} className="custom-scrollbar">
+                  {/* Horizontal car scroll */}
+                  <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 10, marginBottom: 14, scrollbarWidth: "none" }}>
                     {availableVehicles.map((vehicle) => {
                       const isSel = selectedVehicleId === vehicle.id;
                       return (
                         <button key={vehicle.id} onClick={() => handleSelectVehicle(vehicle.id)} style={{
-                          display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
-                          borderRadius: "var(--radius-sm)", textAlign: "left",
-                          border: `1px solid ${isSel ? "rgba(249,115,22,0.5)" : "rgba(255,255,255,0.06)"}`,
-                          background: isSel ? "var(--color-orange-bg)" : "rgba(255,255,255,0.03)",
-                          cursor: "pointer", transition: "all var(--transition-fast)",
-                          boxShadow: isSel ? "0 0 16px rgba(249,115,22,0.15)" : "none",
+                          minWidth: 140, padding: "12px 14px", borderRadius: 14, textAlign: "left", flexShrink: 0,
+                          border: `1px solid ${isSel ? "rgba(249,115,22,0.45)" : "rgba(255,255,255,0.06)"}`,
+                          background: isSel ? "var(--color-orange-bg)" : "rgba(255,255,255,0.04)",
+                          cursor: "pointer",
+                          boxShadow: isSel ? "0 0 18px rgba(249,115,22,0.16)" : "none",
                         }}>
-                          <Car size={16} color={isSel ? "var(--color-orange)" : "var(--color-text-muted)"} style={{ flexShrink: 0 }} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: isSel ? "var(--color-text-strong)" : "var(--color-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {vehicle.model || t('work.vehicle.unknownModel')}
-                            </div>
-                            <div style={{ fontSize: 11, color: "var(--color-text-muted)" }}>{vehicle.license_plate}</div>
-                          </div>
-                          {isSel && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-orange)", flexShrink: 0, boxShadow: "0 0 8px rgba(249,115,22,0.6)" }} />}
+                          <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)", letterSpacing: "0.06em", marginBottom: 4 }}>
+                            {vehicle.model || t('work.vehicle.unknownModel')}
+                          </p>
+                          <p style={{ fontSize: 18, fontWeight: 600, color: "var(--color-text-strong)", lineHeight: 1.2, marginBottom: 4 }}>
+                            {vehicle.license_plate}
+                          </p>
+                          <span style={{ fontSize: 9, fontWeight: 700, color: "var(--color-success)", letterSpacing: "0.04em" }}>● ВІЛЬНО</span>
                         </button>
                       );
                     })}
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
-                    {[['dateFrom', dateFrom, setDateFrom, t('work.vehicle.dateFrom', 'From')], ['dateTo', dateTo, setDateTo, t('work.vehicle.dateTo', 'To')]] .map(([key, val, setter, label]) => (
-                      <label key={key as string} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                        <span style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 500 }}>{label as string}</span>
-                        <input type="date" value={val as string}
-                          onChange={(e) => (setter as any)(e.target.value)}
-                          min={new Date().toISOString().split('T')[0]}
-                          style={{ padding: "8px 10px", fontSize: 13, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "var(--radius-sm)", color: "var(--color-text-strong)" }}
-                        />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+                    {([['dateFrom', dateFrom, setDateFrom, t('work.vehicle.dateFrom', 'ДАТА З')], ['dateTo', dateTo, setDateTo, t('work.vehicle.dateTo', 'ДАТА ДО')]] as const).map(([key, val, setter, label]) => (
+                      <label key={key} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12 }}>
+                          <Calendar size={14} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
+                          <input
+                            type="date"
+                            value={val}
+                            onChange={(e) => (setter as (v: string) => void)(e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                            style={{ fontSize: 13, background: "transparent", border: "none", color: "var(--color-text-strong)", outline: "none", width: "100%", colorScheme: "dark" }}
+                          />
+                        </div>
                       </label>
                     ))}
                   </div>
-                  <button onClick={handleReserveVehicle} disabled={!selectedVehicleId || !(dateFrom || dateTo) || isVehicleActionLoading} style={{
-                    width: "100%", height: 44, borderRadius: "var(--radius-sm)",
-                    background: selectedVehicleId && (dateFrom || dateTo) ? "var(--color-orange)" : "rgba(255,255,255,0.04)",
-                    border: selectedVehicleId && (dateFrom || dateTo) ? "none" : "1px solid rgba(255,255,255,0.08)",
-                    color: selectedVehicleId && (dateFrom || dateTo) ? "#fff" : "var(--color-text-muted)",
-                    fontSize: 14, fontWeight: 600,
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                    cursor: selectedVehicleId && (dateFrom || dateTo) ? "pointer" : "not-allowed",
-                    transition: "all var(--transition-fast)",
-                    boxShadow: selectedVehicleId && (dateFrom || dateTo) ? "0 4px 20px rgba(249,115,22,0.3)" : "none",
-                  }}>
+                  <button
+                    onClick={handleReserveVehicle}
+                    disabled={!selectedVehicleId || !(dateFrom || dateTo) || isVehicleActionLoading}
+                    style={{
+                      width: "100%", height: 48, borderRadius: 12,
+                      background: "transparent",
+                      border: `2px solid ${selectedVehicleId && (dateFrom || dateTo) ? "var(--color-orange)" : "rgba(255,255,255,0.12)"}`,
+                      color: selectedVehicleId && (dateFrom || dateTo) ? "var(--color-orange)" : "var(--color-text-muted)",
+                      fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      cursor: selectedVehicleId && (dateFrom || dateTo) ? "pointer" : "not-allowed",
+                    }}
+                  >
                     {isVehicleActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Car size={16} />}
-                    {t('work.vehicle.createRequest', 'Request vehicle')}
+                    {t('work.vehicle.createRequest', selectedVehicleId && (dateFrom || dateTo) ? 'ЗАБРОНЮВАТИ' : 'ОБЕРІТЬ ДАТУ')}
                   </button>
                 </>
               ) : (
                 <p style={{ fontSize: 13, color: "var(--color-text-muted)", textAlign: "center", padding: "12px 0" }}>
-                  {t('work.vehicle.noAvailable', 'No vehicles available')}
+                  {t('work.vehicle.noAvailable', 'Немає доступних авто')}
                 </p>
               )}
             </div>
           )}
 
-          {/* ── Main CTA ── */}
-          <div style={{ paddingTop: 4 }}>
+          {/* ── Start object CTA ── */}
+          <div className="glass" style={{ borderRadius: 20, padding: 16, border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
             {isRestricted ? (
-              <div style={{
-                padding: "16px", borderRadius: "var(--radius)",
-                background: "var(--color-asphalt)", border: "1px solid var(--color-border)",
-                textAlign: "center", color: "var(--color-text-muted)", fontSize: 14,
-              }}>
-                {t('work.waitForAdminApproval', 'Wait for admin approval')}
+              <div style={{ textAlign: "center", color: "var(--color-text-muted)", fontSize: 14 }}>
+                {t('work.waitForAdminApproval', 'Очікуйте підтвердження адміна')}
               </div>
             ) : (
               <>
-                <button onClick={handleStartWork} disabled={!startBtnEnabled} style={{
-                  width: "100%", height: 58, borderRadius: "var(--radius)",
-                  background: startBtnEnabled
-                    ? "linear-gradient(135deg, var(--color-orange) 0%, var(--color-orange-accent) 100%)"
-                    : "var(--color-asphalt)",
-                  border: "none",
-                  color: startBtnEnabled ? "#fff" : "var(--color-text-muted)",
-                  fontSize: 17, fontWeight: 700, letterSpacing: "0.01em",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                  cursor: startBtnEnabled ? "pointer" : "not-allowed",
-                  boxShadow: startBtnEnabled ? "0 4px 20px rgba(249,115,22,0.35)" : "none",
-                  transition: "all var(--transition-normal)",
-                }}>
-                  {isStartingWork
-                    ? <><Loader2 size={22} className="animate-spin" />{t('work.startingWork', 'Starting...')}</>
-                    : <><Play size={22} />{t('work.startWork', 'Start work')}</>
-                  }
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <Rocket size={16} color={startBtnEnabled ? "var(--color-orange)" : "var(--color-text-muted)"} />
+                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-text-muted)" }}>
+                    {t('work.ctaTitle', "ГОТОВІ ПОЧАТИ ОБ'ЄКТ?")}
+                  </span>
+                </div>
+                <button
+                  onClick={handleStartWork}
+                  disabled={!startBtnEnabled}
+                  style={{
+                    width: "100%", padding: "16px", borderRadius: 14,
+                    background: startBtnEnabled
+                      ? "linear-gradient(135deg, var(--color-orange) 0%, var(--color-orange-accent) 100%)"
+                      : "rgba(255,255,255,0.04)",
+                    border: "none",
+                    color: startBtnEnabled ? "#fff" : "var(--color-text-muted)",
+                    fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                    cursor: startBtnEnabled ? "pointer" : "not-allowed",
+                    boxShadow: startBtnEnabled ? "0 4px 24px rgba(249,115,22,0.4)" : "none",
+                    transition: "all var(--transition-normal)",
+                  }}
+                >
+                  {startBtnEnabled ? (
+                    isStartingWork
+                      ? <><Loader2 size={20} className="animate-spin" />{t('work.startingWork', 'ПОЧИНАЄМО...')}</>
+                      : <><Play size={20} />{t('work.startWork', "ПОЧАТИ ОБ'ЄКТ")}</>
+                  ) : (
+                    <><Lock size={18} />{t('work.startWork', "ПОЧАТИ ОБ'ЄКТ")}</>
+                  )}
                 </button>
-
-                {/* Hint messages */}
                 {!startBtnEnabled && !isRestricted && (
-                  <p style={{ fontSize: 12, color: "var(--color-text-muted)", textAlign: "center", marginTop: 8 }}>
+                  <p style={{ fontSize: 11, color: "var(--color-text-muted)", textAlign: "center", marginTop: 8, fontStyle: "italic" }}>
                     {canSelectObjectsAndVehicles && (canChooseWorkType ? workType === 'facility' : true) && !activeWorkShift
-                      ? t('work.shift.startFirst', 'Start a shift first')
-                      : t('work.selectObjectFirst', 'Select an object first')}
+                      ? t('work.shift.startFirst', "Спершу потрібно почати робочий день та обрати об'єкт")
+                      : t('work.selectObjectFirst', "Оберіть об'єкт для початку")}
                   </p>
                 )}
               </>
