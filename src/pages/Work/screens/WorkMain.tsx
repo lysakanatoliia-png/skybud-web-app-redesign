@@ -929,9 +929,8 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
   const selectedFacility = facilities.find(f => f.id.toString() === selectedObject);
 
   return (
-    <div className="page" style={{ background: "var(--color-bg)" }}>
+    <div className="page">
 
-      {/* ── Error details ── */}
       {errorDetails && (
         <ErrorDetails
           title={errorDetails.title}
@@ -942,53 +941,51 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
       )}
         
       {/* ── Header ── */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 4 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
         <div>
-          <p style={{ fontSize: 13, color: "var(--color-text-muted)", marginBottom: 2 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: 4 }}>
             {formatToday()}
           </p>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--color-text-strong)", lineHeight: 1.2, margin: 0 }}>
-            {isWorking ? t('work.working', 'Working') : t('work.title', 'Work')}
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: "var(--color-text-strong)", letterSpacing: "-0.03em", lineHeight: 1.1, margin: 0 }}>
+            {isWorking ? t('work.working', 'В роботі') : t('work.title', 'Робота')}
           </h1>
           {user?.worker_type && (
             <span style={{
-              display: "inline-block", marginTop: 6,
-              fontSize: 11, fontWeight: 600, letterSpacing: "0.04em",
-              padding: "2px 8px", borderRadius: 99,
+              display: "inline-block", marginTop: 8,
+              fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+              padding: "3px 10px", borderRadius: "var(--radius-full)",
               background: "var(--color-orange-bg)",
+              border: "1px solid rgba(249,115,22,0.3)",
               color: "var(--color-orange)",
               textTransform: "uppercase",
+              boxShadow: "0 0 12px rgba(249,115,22,0.15)",
             }}>
               {t(`admin.workers.types.${user.worker_type}`, user.worker_type)}
             </span>
           )}
         </div>
-
-        {/* Quick action buttons */}
-        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          <button onClick={() => setIsDelegateTaskDialogOpen(true)}
-            style={{
-              width: 40, height: 40, borderRadius: 12,
-              border: "1px solid var(--color-border)",
-              background: "var(--color-surface)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", color: "var(--color-text-muted)",
-            }}
-            title={t('work.delegateTask.button', 'Delegate task')}
-          >
-            <UserPlus size={18} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+          <button onClick={() => setIsDelegateTaskDialogOpen(true)} style={{
+            height: 38, padding: "0 12px", borderRadius: "var(--radius-sm)",
+            border: "1px solid var(--color-border)",
+            background: "var(--glass-bg)", backdropFilter: "blur(20px)",
+            display: "flex", alignItems: "center", gap: 6,
+            cursor: "pointer", color: "var(--color-text-muted)",
+            fontSize: 12, fontWeight: 600, whiteSpace: "nowrap",
+          }}>
+            <UserPlus size={13} />
+            {t('work.delegateTask.button', 'Делегувати')}
           </button>
-          <button onClick={onShowHistory}
-            style={{
-              width: 40, height: 40, borderRadius: 12,
-              border: "1px solid var(--color-border)",
-              background: "var(--color-surface)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", color: "var(--color-text-muted)",
-            }}
-            title={t('work.history.viewButton', 'History')}
-          >
-            <ListChecks size={18} />
+          <button onClick={onShowHistory} style={{
+            height: 38, padding: "0 12px", borderRadius: "var(--radius-sm)",
+            border: "1px solid rgba(249,115,22,0.35)",
+            background: "rgba(249,115,22,0.08)",
+            display: "flex", alignItems: "center", gap: 6,
+            cursor: "pointer", color: "var(--color-orange)",
+            fontSize: 12, fontWeight: 600, whiteSpace: "nowrap",
+          }}>
+            <ListChecks size={13} />
+            {t('work.history.viewButton', 'Історія')}
           </button>
         </div>
       </div>
@@ -996,80 +993,64 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
       {/* ── WORKING STATE ── */}
       {isWorking ? (
         <>
-          {/* Active work card */}
-          <div style={{
-            background: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius)",
-            padding: "16px",
-            boxShadow: "var(--shadow-sm)",
+          <div className="glass" style={{
+            borderRadius: "var(--radius-lg)", padding: 16,
+            border: "1px solid rgba(249,115,22,0.2)",
+            boxShadow: "0 0 32px rgba(249,115,22,0.12)",
           }}>
-            {/* Pulsing status dot */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
               <span style={{
                 width: 8, height: 8, borderRadius: "50%",
                 background: "var(--color-success)",
-                boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
-                animation: "pulse 2s infinite",
+                boxShadow: "0 0 0 4px rgba(34,197,94,0.15)",
+                animation: "pulse 2s infinite", flexShrink: 0,
               }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-success)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                {t('work.working', 'Working')}
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--color-success)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                {t('work.working', 'Активна робота')}
               </span>
             </div>
-
-            {/* Current object */}
             <div style={{
               display: "flex", alignItems: "center", gap: 10,
               padding: "12px 14px",
               background: "var(--color-orange-bg)",
-              border: "1px solid rgba(249,115,22,0.2)",
-              borderRadius: "var(--radius-sm)",
-              marginBottom: 14,
+              border: "1px solid rgba(249,115,22,0.25)",
+              borderRadius: "var(--radius-sm)", marginBottom: 14,
+              boxShadow: "0 0 20px rgba(249,115,22,0.12)",
             }}>
-              <MapPin size={18} color="var(--color-orange)" style={{ flexShrink: 0 }} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: "var(--color-text-strong)" }}>
+              <MapPin size={16} color="var(--color-orange)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 15, fontWeight: 700, color: "var(--color-text-strong)" }}>
                 {canSelectObjectsAndVehicles
                   ? (selectedFacility?.name || t('work.unnamedObject'))
-                  : t('work.office', 'Office')}
+                  : t('work.office', 'Офіс')}
               </span>
             </div>
-
-            {/* Stop + Telegram buttons */}
             <button onClick={handleStopWork} style={{
               width: "100%", height: 52, borderRadius: "var(--radius-sm)",
-              background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)",
+              background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
               color: "#EF4444", fontSize: 15, fontWeight: 700,
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              cursor: "pointer",
+              cursor: "pointer", marginBottom: 10,
             }}>
               <Square size={18} />
-              {t('work.stopWork', 'Stop work')}
+              {t('work.stopWork', 'Зупинити роботу')}
             </button>
-
             {canSelectObjectsAndVehicles && (
               <button onClick={handleTelegramGroup} style={{
                 width: "100%", height: 44, borderRadius: "var(--radius-sm)",
                 background: "transparent", border: "1px solid var(--color-border)",
-                color: "var(--color-text-secondary)", fontSize: 14, fontWeight: 500,
+                color: "var(--color-text-muted)", fontSize: 13, fontWeight: 600,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                cursor: "pointer", marginTop: 10,
+                cursor: "pointer",
               }}>
-                <MessageCircle size={16} />
-                {t('work.joinTelegramGroup', 'Telegram group')}
+                <MessageCircle size={15} />
+                {t('work.joinTelegramGroup', 'Telegram група')}
               </button>
             )}
           </div>
 
-          {/* Embedded TodoList */}
-          <div style={{
-            background: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius)",
-            padding: "16px",
-            boxShadow: "var(--shadow-sm)",
-          }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>
-              {t('work.todoList', 'Tasks')}
+          <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: 16, border: "1px solid var(--color-border)" }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
+              {t('work.todoList', 'Завдання')}
             </p>
             <TodoList
               embedded
@@ -1082,25 +1063,20 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
         <>
           {/* ── Work type toggle (foreman/engineer/assistant) ── */}
           {canChooseWorkType && (
-            <div style={{
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius)",
-              padding: "14px 16px",
-              boxShadow: "var(--shadow-sm)",
-            }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+            <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: "14px 16px", border: "1px solid var(--color-border)" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
                 {t('work.selectWorkType', 'Work type')}
               </p>
               <div style={{ display: "flex", gap: 8 }}>
                 {([['facility', MapPin, t('work.workTypeFacility', 'On-site')] , ['office', MessageCircle, t('work.workTypeOffice', 'Office')]] as const).map(([type, Icon, label]) => (
                   <button key={type} onClick={() => setWorkType(type as 'facility' | 'office')} style={{
                     flex: 1, height: 52, borderRadius: "var(--radius-sm)",
-                    border: `2px solid ${workType === type ? "var(--color-orange)" : "var(--color-border)"}`,
-                    background: workType === type ? "var(--color-orange-bg)" : "transparent",
+                    border: `1px solid ${workType === type ? "var(--color-orange)" : "rgba(255,255,255,0.08)"}`,
+                    background: workType === type ? "var(--color-orange-bg)" : "rgba(255,255,255,0.03)",
                     color: workType === type ? "var(--color-orange)" : "var(--color-text-muted)",
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
                     cursor: "pointer", transition: "all var(--transition-fast)",
+                    boxShadow: workType === type ? "0 0 16px rgba(249,115,22,0.18)" : "none",
                   }}>
                     <Icon size={18} />
                     <span style={{ fontSize: 11, fontWeight: 600 }}>{label}</span>
@@ -1112,14 +1088,8 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
 
           {/* ── Object selector ── */}
           {canSelectObjectsAndVehicles && workType !== 'office' && (
-            <div style={{
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius)",
-              padding: "14px 16px",
-              boxShadow: "var(--shadow-sm)",
-            }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+            <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: "14px 16px", border: "1px solid var(--color-border)" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
                 {t('work.selectObject', 'Select object')}
               </p>
               {isLoading ? (
@@ -1139,20 +1109,21 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
                         display: "flex", alignItems: "center", gap: 12,
                         padding: "12px 14px",
                         borderRadius: "var(--radius-sm)",
-                        border: `1px solid ${selected ? "var(--color-orange)" : "var(--color-border)"}`,
-                        background: selected ? "var(--color-orange-bg)" : "transparent",
+                        border: `1px solid ${selected ? "rgba(249,115,22,0.5)" : "rgba(255,255,255,0.06)"}`,
+                        background: selected ? "var(--color-orange-bg)" : "rgba(255,255,255,0.03)",
                         cursor: "pointer", textAlign: "left",
                         transition: "all var(--transition-fast)",
+                        boxShadow: selected ? "0 0 16px rgba(249,115,22,0.15)" : "none",
                       }}>
                         <div style={{
                           width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                          background: selected ? "var(--color-orange)" : "var(--color-asphalt)",
+                          background: selected ? "var(--color-orange)" : "rgba(255,255,255,0.06)",
                           display: "flex", alignItems: "center", justifyContent: "center",
                         }}>
                           <MapPin size={14} color={selected ? "#fff" : "var(--color-text-muted)"} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text-strong)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: selected ? "var(--color-text-strong)" : "var(--color-text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                             {facility.name || t('work.unnamedObject')}
                           </div>
                           {facility.status_active === false && (
@@ -1160,7 +1131,7 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
                           )}
                         </div>
                         {selected && (
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--color-orange)", flexShrink: 0 }} />
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--color-orange)", flexShrink: 0, boxShadow: "0 0 8px rgba(249,115,22,0.6)" }} />
                         )}
                       </button>
                     );
@@ -1172,21 +1143,16 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
 
           {/* ── Shift card ── */}
           {canSelectObjectsAndVehicles && (
-            <div style={{
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius)",
-              padding: "14px 16px",
-              boxShadow: "var(--shadow-sm)",
-            }}>
+            <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: "14px 16px", border: "1px solid var(--color-border)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: activeWorkShift ? 10 : 0 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   {t('work.shift.title', 'Shift')}
                 </p>
                 {activeWorkShift && (
                   <span style={{
-                    fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99,
+                    fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: "var(--radius-full)",
                     background: "rgba(34,197,94,0.12)", color: "var(--color-success)",
+                    border: "1px solid rgba(34,197,94,0.2)", letterSpacing: "0.06em", textTransform: "uppercase",
                   }}>
                     {t('work.shift.activeBadge', 'Active')}
                   </span>
@@ -1200,7 +1166,7 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
                   </p>
                   <button onClick={handleEndShift} disabled={isShiftActionLoading || isWorking} style={{
                     width: "100%", height: 48, borderRadius: "var(--radius-sm)",
-                    background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
+                    background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
                     color: "#EF4444", fontSize: 14, fontWeight: 600,
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                     cursor: isShiftActionLoading || isWorking ? "not-allowed" : "pointer",
@@ -1218,7 +1184,7 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
               ) : (
                 <button onClick={handleStartShift} disabled={isShiftActionLoading} style={{
                   width: "100%", height: 48, borderRadius: "var(--radius-sm)",
-                  background: "var(--color-asphalt)", border: "1px solid var(--color-border)",
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
                   color: "var(--color-text-strong)", fontSize: 14, fontWeight: 600,
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                   cursor: isShiftActionLoading ? "not-allowed" : "pointer",
@@ -1233,14 +1199,8 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
 
           {/* ── Vehicle card ── */}
           {!isRestricted && canSelectObjectsAndVehicles && (
-            <div style={{
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius)",
-              padding: "14px 16px",
-              boxShadow: "var(--shadow-sm)",
-            }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+            <div className="glass" style={{ borderRadius: "var(--radius-lg)", padding: "14px 16px", border: "1px solid var(--color-border)" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
                 {t('work.vehicle.sectionTitle', 'Vehicle')}
               </p>
 
@@ -1252,8 +1212,9 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
                 <>
                   <div style={{
                     display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
-                    background: "var(--color-orange-bg)", border: "1px solid rgba(249,115,22,0.2)",
+                    background: "var(--color-orange-bg)", border: "1px solid rgba(249,115,22,0.25)",
                     borderRadius: "var(--radius-sm)", marginBottom: 10,
+                    boxShadow: "0 0 20px rgba(249,115,22,0.12)",
                   }}>
                     <Car size={18} color="var(--color-orange)" style={{ flexShrink: 0 }} />
                     <div>
@@ -1263,7 +1224,7 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
                   </div>
                   <button onClick={handleReleaseVehicle} disabled={isVehicleActionLoading} style={{
                     width: "100%", height: 44, borderRadius: "var(--radius-sm)",
-                    background: "transparent", border: "1px solid var(--color-border)",
+                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
                     color: "var(--color-text-muted)", fontSize: 13, fontWeight: 600,
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                     cursor: "pointer",
@@ -1275,7 +1236,7 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
               ) : reservationRequest ? (
                 <div style={{
                   padding: "10px 12px", borderRadius: "var(--radius-sm)",
-                  border: "1px solid var(--color-border)", background: "var(--color-asphalt)",
+                  border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)",
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                     <Car size={16} color="var(--color-text-muted)" />
@@ -1316,18 +1277,19 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
                         <button key={vehicle.id} onClick={() => handleSelectVehicle(vehicle.id)} style={{
                           display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
                           borderRadius: "var(--radius-sm)", textAlign: "left",
-                          border: `1px solid ${isSel ? "var(--color-orange)" : "var(--color-border)"}`,
-                          background: isSel ? "var(--color-orange-bg)" : "transparent",
+                          border: `1px solid ${isSel ? "rgba(249,115,22,0.5)" : "rgba(255,255,255,0.06)"}`,
+                          background: isSel ? "var(--color-orange-bg)" : "rgba(255,255,255,0.03)",
                           cursor: "pointer", transition: "all var(--transition-fast)",
+                          boxShadow: isSel ? "0 0 16px rgba(249,115,22,0.15)" : "none",
                         }}>
                           <Car size={16} color={isSel ? "var(--color-orange)" : "var(--color-text-muted)"} style={{ flexShrink: 0 }} />
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-strong)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: isSel ? "var(--color-text-strong)" : "var(--color-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {vehicle.model || t('work.vehicle.unknownModel')}
                             </div>
                             <div style={{ fontSize: 11, color: "var(--color-text-muted)" }}>{vehicle.license_plate}</div>
                           </div>
-                          {isSel && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-orange)", flexShrink: 0 }} />}
+                          {isSel && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-orange)", flexShrink: 0, boxShadow: "0 0 8px rgba(249,115,22,0.6)" }} />}
                         </button>
                       );
                     })}
@@ -1339,19 +1301,21 @@ const WorkMain: FC<WorkMainProps> = ({ onStartWork, onStopWork, selectedObject, 
                         <input type="date" value={val as string}
                           onChange={(e) => (setter as any)(e.target.value)}
                           min={new Date().toISOString().split('T')[0]}
-                          style={{ padding: "8px 10px", fontSize: 13, background: "var(--color-asphalt)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", color: "var(--color-text-strong)" }}
+                          style={{ padding: "8px 10px", fontSize: 13, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "var(--radius-sm)", color: "var(--color-text-strong)" }}
                         />
                       </label>
                     ))}
                   </div>
                   <button onClick={handleReserveVehicle} disabled={!selectedVehicleId || !(dateFrom || dateTo) || isVehicleActionLoading} style={{
                     width: "100%", height: 44, borderRadius: "var(--radius-sm)",
-                    background: selectedVehicleId && (dateFrom || dateTo) ? "var(--color-orange)" : "var(--color-asphalt)",
-                    border: "none", color: selectedVehicleId && (dateFrom || dateTo) ? "#fff" : "var(--color-text-muted)",
+                    background: selectedVehicleId && (dateFrom || dateTo) ? "var(--color-orange)" : "rgba(255,255,255,0.04)",
+                    border: selectedVehicleId && (dateFrom || dateTo) ? "none" : "1px solid rgba(255,255,255,0.08)",
+                    color: selectedVehicleId && (dateFrom || dateTo) ? "#fff" : "var(--color-text-muted)",
                     fontSize: 14, fontWeight: 600,
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                     cursor: selectedVehicleId && (dateFrom || dateTo) ? "pointer" : "not-allowed",
                     transition: "all var(--transition-fast)",
+                    boxShadow: selectedVehicleId && (dateFrom || dateTo) ? "0 4px 20px rgba(249,115,22,0.3)" : "none",
                   }}>
                     {isVehicleActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Car size={16} />}
                     {t('work.vehicle.createRequest', 'Request vehicle')}

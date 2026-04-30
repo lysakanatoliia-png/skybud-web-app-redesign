@@ -1,6 +1,9 @@
 export default {
   WORK: "/",
   SALARY: "/salary",
+  EXPENSES: "/expenses",
+  HELP: "/help",
+  VEHICLE_TRANSFER: "/vehicle-transfer",
   ROUTES: "/routes",
   ADMIN: "/admin",
   ADMIN_FACILITIES: "/admin/facilities",
